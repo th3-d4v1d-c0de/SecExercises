@@ -46,6 +46,10 @@ def detect_compromised_identities(
 
     # 3. Sliding window analysis per identity
     for identity, events in events_by_identity.items():
+        # NOTE: We use `collections.deque` (Double-Ended Queue) instead of a standard list.
+        # A list's `list.pop(0)` takes O(N) time because it shifts every remaining element in memory.
+        # `deque.popleft()` removes expired elements from the front in O(1) constant time,
+        # which is essential for efficient sliding window algorithms processing large log streams.
         recent_failures: deque = deque()
 
         for event in events:
