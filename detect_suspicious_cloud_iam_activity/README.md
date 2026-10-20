@@ -46,3 +46,23 @@ Your function should return a list of dictionaries, one per detected alert:
    - Group events by identity (and optionally `sourceIP` depending on requirements).
 4. **Sliding Window Logic**:
    - Track failed events within the window leading up to a success.
+
+---
+
+## Running the Code
+
+From the repository root, you can use the `Makefile`:
+
+```bash
+# Run unit tests
+make test
+
+# Run the detection script on sample logs
+make run
+
+# Run both tests and detection
+make all
+
+# Clean up Python bytecode and caches
+make clean
+```
