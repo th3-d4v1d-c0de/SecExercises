@@ -1,0 +1,16 @@
+sample_logs = [
+    # Normal user traffic
+    {"timestamp": "2026-10-20T17:00:00Z", "identity": "user_alice", "eventName": "DescribeInstances", "errorCode": None, "sourceIP": "10.0.1.5"},
+    {"timestamp": "2026-10-20T17:01:00Z", "identity": "user_alice", "eventName": "ListBuckets", "errorCode": None, "sourceIP": "10.0.1.5"},
+    
+    # Suspicious user traffic (3 failures followed by success within 5 mins)
+    {"timestamp": "2026-10-20T17:02:00Z", "identity": "user_bob", "eventName": "CreateUser", "errorCode": "AccessDenied", "sourceIP": "198.51.100.24"},
+    {"timestamp": "2026-10-20T17:03:10Z", "identity": "user_bob", "eventName": "AttachRolePolicy", "errorCode": "AccessDenied", "sourceIP": "198.51.100.24"},
+    {"timestamp": "2026-10-20T17:04:00Z", "identity": "user_bob", "eventName": "PutBucketPolicy", "errorCode": "AccessDenied", "sourceIP": "198.51.100.24"},
+    {"timestamp": "2026-10-20T17:05:30Z", "identity": "user_bob", "eventName": "GetCallerIdentity", "errorCode": None, "sourceIP": "198.51.100.24"},
+    
+    # User with multiple failures, but NO subsequent success (not suspicious under this rule)
+    {"timestamp": "2026-10-20T17:00:00Z", "identity": "user_charlie", "eventName": "ListSecrets", "errorCode": "AccessDenied", "sourceIP": "198.51.100.99"},
+    {"timestamp": "2026-10-20T17:01:00Z", "identity": "user_charlie", "eventName": "DescribeKeys", "errorCode": "AccessDenied", "sourceIP": "198.51.100.99"},
+    {"timestamp": "2026-10-20T17:02:00Z", "identity": "user_charlie", "eventName": "GetSecretValue", "errorCode": "AccessDenied", "sourceIP": "198.51.100.99"},
+]
