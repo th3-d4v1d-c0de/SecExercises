@@ -60,6 +60,11 @@ def detect_compromised_identities(
             else:
                 # It's a success: prune failures that fell outside the time window
                 cutoff_time = curr_time.timestamp() - time_window_seconds
+                # NOTE: The while loop evicts expired failures from the front of the queue.
+                # Since events are chronological, index 0 is always the oldest failure.
+                # If its timestamp < cutoff_time, it is outside the 300s window and we pop it.
+                # As soon as index 0 is >= cutoff_time, all remaining failures are guaranteed
+                # to be inside the window, so the loop stops immediately.
                 while recent_failures and parse_timestamp(recent_failures[0]["timestamp"]).timestamp() < cutoff_time:
                     recent_failures.popleft()
 

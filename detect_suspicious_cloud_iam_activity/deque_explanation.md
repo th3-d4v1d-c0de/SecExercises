@@ -116,7 +116,70 @@ Security detections frequently monitor high-throughput event streams for pattern
 
 ---
 
-## 6. How It Is Used in Our Solution
+## 6. Visualizing the Deque & Sliding Window Cycles
+
+### A. The Per-Event Processing Cycle
+
+```mermaid
+flowchart TD
+    Start["Next Event in chronological order"] --> CheckType{"Is event a failure?"}
+
+    %% Failure branch
+    CheckType -- "Yes (errorCode != null)" --> PushQueue["recent_failures.append(event)<br>Add to right end in O(1)"]
+    PushQueue --> EndEvent["Wait for next event"]
+
+    %% Success branch
+    CheckType -- "No (Success)" --> CalcCutoff["cutoff_time = curr_time - time_window_seconds"]
+    CalcCutoff --> CheckExpired{"Queue not empty AND<br>oldest event < cutoff_time?"}
+
+    %% While loop eviction
+    CheckExpired -- "Yes (Expired)" --> PopLeft["recent_failures.popleft()<br>Evict oldest from left in O(1)"]
+    PopLeft --> CheckExpired
+
+    %% Post eviction check
+    CheckExpired -- "No (All in window)" --> CheckThreshold{"len(recent_failures) >= threshold?"}
+
+    CheckThreshold -- "Yes" --> TriggerAlert["🚨 TRIGGER ALERT<br>- first_failure = recent_failures[0]<br>- first_success = event<br>- failed_count = len(recent_failures)"]
+    TriggerAlert --> ClearQueue["recent_failures.clear()<br>Reset queue to prevent duplicate alerts"]
+    ClearQueue --> EndEvent
+
+    CheckThreshold -- "No" --> EndEvent
+```
+
+### B. The Deque Timeline & Eviction Cycle
+
+```mermaid
+flowchart LR
+    subgraph S1 ["1. Failure (17:02:00)"]
+        direction TB
+        Q1["[ 17:02:00 ]"]
+        A1[".append()"]
+    end
+
+    subgraph S2 ["2. Failure (17:03:10)"]
+        direction TB
+        Q2["[ 17:02:00, 17:03:10 ]"]
+        A2[".append()"]
+    end
+
+    subgraph S3 ["3. Failure (17:04:00)"]
+        direction TB
+        Q3["[ 17:02:00, 17:03:10, 17:04:00 ]"]
+        A3[".append()"]
+    end
+
+    subgraph S4 ["4. Success (17:05:30)"]
+        direction TB
+        Q4["cutoff = 17:00:30<br>17:02:00 >= cutoff (valid)"]
+        A4["Count = 3 >= 3<br>🚨 Alert Fired!"]
+    end
+
+    S1 --> S2 --> S3 --> S4
+```
+
+---
+
+## 7. How It Is Used in Our Solution
 
 In [`solution.py`](./solution.py):
 
