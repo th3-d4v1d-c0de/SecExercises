@@ -1,0 +1,39 @@
+{
+  "approved_cidrs": [
+    "10.0.0.0/8",
+    "192.168.1.0/24",
+    "2001:db8::/32"
+  ],
+  "logs": [
+    {
+      "action": "DescribeSecret",
+      "client_ip": "10.5.2.1",
+      "comment": "Allowed - falls inside 10.0.0.0/8 private corporate range"
+    },
+    {
+      "action": "DeleteBucket",
+      "client_ip": "203.0.113.45",
+      "comment": "Unauthorized - public IPv4 outside approved egress ranges"
+    },
+    {
+      "action": "AssumeRole",
+      "client_ip": "invalid-ip-string",
+      "comment": "Malformed IP - gracefully ignored without raising exceptions"
+    },
+    {
+      "action": "UpdatePolicy",
+      "client_ip": "203.0.113.45",
+      "comment": "Unauthorized - duplicate unapproved IP performing another action"
+    },
+    {
+      "action": "GetCallerIdentity",
+      "client_ip": "2001:db8::100",
+      "comment": "Allowed - falls inside 2001:db8::/32 approved IPv6 range"
+    },
+    {
+      "action": "ListUsers",
+      "client_ip": "2607:f8b0:4005:805::200e",
+      "comment": "Unauthorized - public IPv6 outside approved egress ranges"
+    }
+  ]
+}
